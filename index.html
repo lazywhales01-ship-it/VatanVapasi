@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NRI 401(k) Journey Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f9f8f6;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.15);
+    --text: #1a1a18;
+    --muted: #6b6b67;
+    --hint: #9b9b96;
+    --teal-50: #E1F5EE; --teal-600: #0F6E56; --teal-800: #085041;
+    --purple-50: #EEEDFE; --purple-600: #534AB7; --purple-800: #26215C;
+    --blue-50: #E6F1FB; --blue-600: #185FA5; --blue-800: #042C53;
+    --green-50: #EAF3DE; --green-600: #3B6D11; --green-800: #173404;
+    --amber-50: #FAEEDA; --amber-600: #854F0B; --amber-800: #412402;
+    --coral-50: #FAECE7; --coral-600: #993C1D; --coral-800: #4A1B0C;
+    --pink-50: #FBEAF0; --pink-600: #993556; --pink-800: #4B1528;
+    --red-600: #A32D2D;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+
+  /* NAV */
+  nav { background: var(--card); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 50; }
+  .nav-logo { font-size: 15px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .nav-logo span { display: inline-block; width: 28px; height: 28px; border-radius: 8px; background: var(--teal-600); color: white; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .nav-pill { font-size: 11px; background: var(--teal-50); color: var(--teal-800); padding: 3px 10px; border-radius: 20px; border: 0.5px solid var(--teal-600); font-weight: 500; }
+
+  /* HERO */
+  .hero { background: var(--card); border-bottom: 0.5px solid var(--border); padding: 3rem 2rem 2.5rem; text-align: center; }
+  .hero h1 { font-size: 28px; font-weight: 600; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+  .hero p { font-size: 15px; color: var(--muted); max-width: 560px; margin: 0 auto 1.5rem; line-height: 1.7; }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .hero-pill { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 0.5px solid; font-weight: 500; }
+
+  /* LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .section { margin-bottom: 2.5rem; }
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--hint); margin-bottom: 12px; }
+  .section-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .section-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+  /* CARDS */
+  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; }
+  .card + .card { margin-top: 10px; }
+
+  /* FLOWCHART NODES */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .flow-node { border-radius: var(--radius); padding: 14px 18px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; border: 0.5px solid; }
+  .flow-node:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .flow-node + .flow-node { margin-top: 8px; }
+  .fn-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .fn-sub { font-size: 12px; line-height: 1.5; }
+  .fn-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-top: 6px; }
+
+  .fn-teal { background: var(--teal-50); border-color: var(--teal-600); }
+  .fn-teal .fn-title { color: var(--teal-800); }
+  .fn-teal .fn-sub { color: var(--teal-600); }
+  .fn-teal .fn-badge { background: #9FE1CB; color: #04342C; }
+
+  .fn-purple { background: var(--purple-50); border-color: var(--purple-600); }
+  .fn-purple .fn-title { color: var(--purple-800); }
+  .fn-purple .fn-sub { color: var(--purple-600); }
+  .fn-purple .fn-badge { background: #CECBF6; color: #26215C; }
+
+  .fn-blue { background: var(--blue-50); border-color: var(--blue-600); }
+  .fn-blue .fn-title { color: var(--blue-800); }
+  .fn-blue .fn-sub { color: var(--blue-600); }
+  .fn-blue .fn-badge { background: #B5D4F4; color: #042C53; }
+
+  .fn-amber { background: var(--amber-50); border-color: var(--amber-600); }
+  .fn-amber .fn-title { color: var(--amber-800); }
+  .fn-amber .fn-sub { color: var(--amber-600); }
+  .fn-amber .fn-badge { background: #FAC775; color: #412402; }
+
+  .fn-gray { background: #f9f8f6; border-color: var(--border-strong); }
+  .fn-gray .fn-title { color: var(--text); }
+  .fn-gray .fn-sub { color: var(--muted); }
+  .fn-gray .fn-badge { background: #e8e6e0; color: var(--muted); }
+
+  .fn-pink { background: var(--pink-50); border-color: var(--pink-600); }
+  .fn-pink .fn-title { color: var(--pink-800); }
+  .fn-pink .fn-sub { color: var(--pink-600); }
+
+  .fn-coral { background: var(--coral-50); border-color: var(--coral-600); }
+  .fn-coral .fn-title { color: var(--coral-800); }
+  .fn-coral .fn-sub { color: var(--coral-600); }
+
+  .arrow { text-align: center; color: var(--hint); font-size: 16px; padding: 2px 0; line-height: 1; }
+
+  /* EXPANDABLE DETAIL */
+  .fn-detail { display: none; padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.7; border: 0.5px solid; border-top: none; border-radius: 0 0 var(--radius) var(--radius); margin-top: -4px; margin-bottom: 4px; }
+  .fn-detail.open { display: block; }
+  .fn-detail ul { padding-left: 1.2rem; margin-top: 6px; }
+  .fn-detail li { margin-bottom: 4px; }
+  .fn-detail .tax-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
+  .fn-detail .tax-row:last-child { border-bottom: none; font-weight: 600; color: var(--text); }
+
+  /* STRATEGY GRID */
+  .strategy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .strat-card { border-radius: var(--radius); padding: 14px; border: 0.5px solid; cursor: pointer; transition: transform 0.15s; }
+  .strat-card:hover { transform: translateY(-2px); }
+  .strat-card.recommended { border-width: 2px; }
+  .strat-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .strat-sub { font-size: 11px; line-height: 1.5; }
+  .rec-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; background: var(--teal-50); color: var(--teal-800); border: 0.5px solid var(--teal-600); }
+
+  /* CALCULATOR */
+  .calc-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .calc-label { font-size: 12px; color: var(--muted); width: 150px; flex-shrink: 0; }
+  .calc-val { font-size: 12px; font-weight: 600; color: var(--text); min-width: 70px; text-align: right; }
+  input[type=range] { flex: 1; height: 4px; border-radius: 2px; accent-color: var(--teal-600); cursor: pointer; }
+  .tab-row { display: flex; gap: 6px; margin: 4px 0 14px; flex-wrap: wrap; }
+  .tab { font-size: 12px; padding: 5px 14px; border-radius: 20px; border: 0.5px solid var(--border-strong); cursor: pointer; background: transparent; color: var(--muted); transition: all 0.15s; font-family: inherit; }
+  .tab.active { background: var(--teal-50); border-color: var(--teal-600); color: var(--teal-800); font-weight: 600; }
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .res-card { background: var(--bg); border-radius: 8px; padding: 12px 14px; }
+  .res-label { font-size: 11px; color: var(--hint); margin-bottom: 4px; }
+  .res-val { font-size: 22px; font-weight: 600; }
+  .res-green { color: var(--green-600); }
+  .res-red { color: var(--red-600); }
+  .res-blue { color: var(--blue-600); }
+  .detail-table { margin-top: 14px; border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .dt-row { display: flex; justify-content: space-between; font-size: 12px; padding: 8px 14px; border-bottom: 0.5px solid var(--border); }
+  .dt-row:last-child { border-bottom: none; font-weight: 600; background: var(--bg); }
+  .dt-row span:first-child { color: var(--muted); }
+
+  /* DTAA / STATUS GRID */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 600px) { .two-col, .three-col, .strategy-grid, .results-grid { grid-template-columns: 1fr; } }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .checklist li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; font-size: 13px; color: var(--muted); }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--border-strong); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; margin-top: 1px; }
+  .check-box.done { background: var(--teal-600); border-color: var(--teal-600); color: white; font-size: 11px; }
+  .check-text.done { text-decoration: line-through; opacity: 0.5; }
+
+  /* EMAIL CAPTURE */
+  .email-section { background: linear-gradient(135deg, var(--teal-50) 0%, var(--blue-50) 100%); border: 0.5px solid var(--teal-600); border-radius: var(--radius-lg); padding: 2rem; text-align: center; }
+  .email-section h2 { font-size: 20px; font-weight: 600; color: var(--teal-800); margin-bottom: 8px; }
+  .email-section p { font-size: 13px; color: var(--teal-600); margin-bottom: 1.5rem; line-height: 1.7; max-width: 480px; margin-left: auto; margin-right: auto; margin-bottom: 1.5rem; }
+  .form-row { display: flex; gap: 10px; max-width: 460px; margin: 0 auto 10px; }
+  .form-row input { flex: 1; padding: 10px 14px; border: 0.5px solid var(--border-strong); border-radius: 8px; font-size: 13px; font-family: inherit; background: white; color: var(--text); outline: none; transition: border-color 0.15s; }
+  .form-row input:focus { border-color: var(--teal-600); }
+  .form-row.single { flex-direction: column; }
+  .btn-submit { padding: 10px 24px; background: var(--teal-600); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .btn-submit:hover { background: var(--teal-800); }
+  .form-note { font-size: 11px; color: var(--hint); margin-top: 6px; }
+  .success-msg { display: none; padding: 14px 20px; background: var(--green-50); border: 0.5px solid var(--green-600); border-radius: 8px; color: var(--green-800); font-size: 13px; font-weight: 500; margin-top: 12px; max-width: 460px; margin-left: auto; margin-right: auto; }
+
+  /* FOOTER */
+  footer { background: var(--card); border-top: 0.5px solid var(--border); padding: 1.5rem 2rem; text-align: center; font-size: 12px; color: var(--hint); }
+  footer a { color: var(--muted); text-decoration: none; }
+
+  /* PROGRESS BAR */
+  .progress-bar { position: fixed; top: 56px; left: 0; width: 100%; height: 3px; background: var(--border); z-index: 49; }
+  .progress-fill { height: 100%; background: var(--teal-600); transition: width 0.3s; width: 0%; }
+
+  /* MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--card); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 440px; width: 100%; max-height: 85vh; overflow-y: auto; }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 8px; }
+  .modal ul { font-size: 13px; color: var(--muted); padding-left: 1.2rem; line-height: 1.7; }
+  .modal .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; }
+  .modal-close { display: block; width: 100%; margin-top: 1rem; padding: 9px; background: var(--bg); border: 0.5px solid var(--border-strong); border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--text); }
+  .modal-close:hover { background: #eee; }
+  .modal hr { border: none; border-top: 0.5px solid var(--border); margin: 10px 0; }
+  .modal .tr { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+  .modal .tr span:first-child { color: var(--muted); }
+  .modal .tr.bold { font-weight: 600; color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span>N</span>
+    NRI 401(k) Journey Planner
+  </div>
+  <span class="nav-pill">Free Tool</span>
+</nav>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<div class="hero">
+  <h1>Your complete 401(k) roadmap<br>for returning to India</h1>
+  <p>Understand every option, tax implication, and timing strategy for H1B holders, Green Card holders, and US NRIs planning to move back.</p>
+  <div class="hero-pills">
+    <span class="hero-pill" style="background:var(--teal-50);border-color:var(--teal-600);color:var(--teal-800)">Traditional &amp; Roth 401(k)</span>
+    <span class="hero-pill" style="background:var(--blue-50);border-color:var(--blue-600);color:var(--blue-800)">US &amp; India tax guidance</span>
+    <span class="hero-pill" style="background:var(--purple-50);border-color:var(--purple-600);color:var(--purple-800)">DTAA · RNOR · Section 89A</span>
+    <span class="hero-pill" style="background:var(--amber-50);border-color:var(--amber-600);color:var(--amber-800)">Interactive tax calculator</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SECTION 1: DECISION GATES -->
+  <div class="section" id="sec-decisions">
+    <div class="section-label">Step 1 — Understand your situation</div>
+    <div class="section-title">Three things that define your entire strategy</div>
+    <div class="section-sub">Tap each card to learn why it matters</div>
+    <div class="flow">
+      <div class="flow-node fn-teal" onclick="openModal('m-status')">
+        <div class="fn-title">① What is your Indian residential status after return?</div>
+        <div class="fn-sub">RNOR (first ~2 years) vs ROR (after ~2 years) — the single most impactful factor for India tax</div>
+        <span class="fn-badge">Tap to learn more</span>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="flow-node fn-purple" onclick="openModal('m-account')">
+        <div class="fn-title">② What type of retirement account do you hold?</div>
+        <div class="fn-sub">Traditional 401(k) / IRA (pre-tax contributions) vs Roth (post-tax) — different tax treatment in both countries</div>
+        <span class="fn-badge">Tap to learn more</span>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="flow-node fn-blue" onclick="openModal('m-age')">
+        <div class="fn-title">③ Are you under age 59½?</div>
+        <div class="fn-sub">Determines if the 10% IRS early withdrawal penalty applies — a significant cost for younger returnees</div>
+        <span class="fn-badge">Tap to learn more</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: STRATEGIES -->
+  <div class="section" id="sec-strategies">
+    <div class="section-label">Step 2 — Choose your strategy</div>
+    <div class="section-title">Five paths for your 401(k) money</div>
+    <div class="section-sub">Each strategy has different tax costs and timing requirements. Tap to see full details.</div>
+    <div class="strategy-grid">
+      <div class="strat-card fn-teal recommended" onclick="openModal('m-s3')">
+        <div class="rec-badge">Most tax-efficient</div>
+        <div class="strat-title" style="color:var(--teal-800)">C. Withdraw during RNOR</div>
+        <div class="strat-sub" style="color:var(--teal-600)">India tax-free window. Only US withholding applies.</div>
+      </div>
+      <div class="strat-card fn-blue" onclick="openModal('m-s1')">
+        <div class="strat-title" style="color:var(--blue-800)">A. Leave untouched</div>
+        <div class="strat-sub" style="color:var(--blue-600)">Keep growing tax-deferred. Withdraw after 59½ or during low-income year.</div>
+      </div>
+      <div class="strat-card fn-purple" onclick="openModal('m-s4')">
+        <div class="strat-title" style="color:var(--purple-800)">D. Roth conversion</div>
+        <div class="strat-sub" style="color:var(--purple-600)">Convert before leaving US. Future withdrawals US tax-free.</div>
+      </div>
+      <div class="strat-card fn-amber" onclick="openModal('m-s5')">
+        <div class="strat-title" style="color:var(--amber-800)">E. Rule 72(t) / SEPP</div>
+        <div class="strat-sub" style="color:var(--amber-600)">Penalty-free early withdrawals if under 59½. Rigid schedule.</div>
+      </div>
+      <div class="strat-card fn-coral" onclick="openModal('m-s2')">
+        <div class="strat-title" style="color:var(--coral-800)">B. Withdraw before leaving</div>
+        <div class="strat-sub" style="color:var(--coral-600)">Lump sum exit. Costliest option — only for small balances.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: TAX CALCULATOR -->
+  <div class="section" id="sec-calc">
+    <div class="section-label">Step 3 — Run your numbers</div>
+    <div class="section-title">Interactive tax scenario calculator</div>
+    <div class="section-sub">Adjust your balance and see exactly what you keep under each scenario</div>
+    <div class="card">
+      <div class="calc-row">
+        <span class="calc-label">401(k) balance (USD)</span>
+        <input type="range" min="50000" max="1000000" step="10000" value="300000" id="bal" oninput="calc()">
+        <span class="calc-val" id="bal-out">$300,000</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">US withholding rate</span>
+        <input type="range" min="15" max="30" step="1" value="30" id="wh" oninput="calc()">
+        <span class="calc-val" id="wh-out">30%</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">India slab rate (if ROR)</span>
+        <input type="range" min="5" max="30" step="5" value="30" id="india" oninput="calc()">
+        <span class="calc-val" id="india-out">30%</span>
+      </div>
+      <div class="tab-row">
+        <button class="tab active" id="tab-rnor" onclick="setTab('rnor')">During RNOR</button>
+        <button class="tab" id="tab-ror" onclick="setTab('ror')">After ROR (with DTAA)</button>
+        <button class="tab" id="tab-now" onclick="setTab('now')">Withdraw now (in US)</button>
+      </div>
+      <div id="detail-table" class="detail-table"></div>
+      <div class="results-grid" id="results"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: INDIA STATUS -->
+  <div class="section" id="sec-india">
+    <div class="section-label">Step 4 — India residency & tax relief</div>
+    <div class="section-title">RNOR, ROR, DTAA and Section 89A explained</div>
+    <div class="section-sub">Tap any card for the full details</div>
+    <div class="two-col" style="margin-bottom:10px">
+      <div class="flow-node fn-teal" onclick="openModal('m-rnor')">
+        <div class="fn-title">RNOR status (years 1–2)</div>
+        <div class="fn-sub">Foreign income including 401(k) withdrawals not taxed in India. Best withdrawal window.</div>
+      </div>
+      <div class="flow-node fn-pink" onclick="openModal('m-ror')">
+        <div class="fn-title">ROR status (after ~2 years)</div>
+        <div class="fn-sub">Global income taxable in India. 401(k) taxed at slab rates up to 30%. Use DTAA + FTC.</div>
+      </div>
+    </div>
+    <div class="three-col">
+      <div class="flow-node fn-blue" onclick="openModal('m-dtaa')">
+        <div class="fn-title">India–US DTAA</div>
+        <div class="fn-sub">Article 20: private pensions taxed only in country of residence. Prevents double tax.</div>
+      </div>
+      <div class="flow-node fn-purple" onclick="openModal('m-89a')">
+        <div class="fn-title">Section 89A relief</div>
+        <div class="fn-sub">India defers tax on foreign retirement accounts — mirrors US tax deferral benefit.</div>
+      </div>
+      <div class="flow-node fn-amber" onclick="openModal('m-estate')">
+        <div class="fn-title">US estate tax risk</div>
+        <div class="fn-sub">Non-US citizens: only $60K exemption. 40% tax above threshold on US assets at death.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: CHECKLIST -->
+  <div class="section" id="sec-checklist">
+    <div class="section-label">Step 5 — Pre-departure checklist</div>
+    <div class="section-title">Don't leave the US without doing these</div>
+    <div class="card">
+      <ul class="checklist" id="checklist">
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Move 401(k) to Fidelity / Schwab International (supports Indian addresses)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Plan return date — aim for April to maximise RNOR window</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Open NRE + NRO bank accounts in India before departing the US</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Open RFC (Resident Foreign Currency) account to hold USD post-return</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">File Form W-8BEN with your broker after arriving in India</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">File US departure-year tax return (Form 1040-NR for following year)</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Continue annual FBAR (FinCEN 114) filings for all US accounts</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Consult a US CPA + Indian CA familiar with cross-border NRI matters</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Discuss US estate tax exposure with a US estate attorney before leaving</span></li>
+        <li><div class="check-box" onclick="toggleCheck(this)"></div><span class="check-text">Claim Section 89A relief in India ITR to defer annual tax on 401(k) growth</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 6: EMAIL CAPTURE -->
+  <div class="section" id="sec-email">
+    <div class="email-section">
+      <h2>Get your personalised 401(k) summary report</h2>
+      <p>Enter your name and email and we'll send you a personalised PDF summary of your 401(k) options, tax scenarios, and the pre-departure checklist — free, no spam.</p>
+      <div class="form-row">
+        <input type="text" id="user-name" placeholder="Your full name" autocomplete="name">
+        <input type="email" id="user-email" placeholder="your@email.com" autocomplete="email">
+        <button class="btn-submit" onclick="submitEmail()">Send report</button>
+      </div>
+      <div class="form-note">We store only your name and email. No spam, no sharing with third parties.</div>
+      <div class="success-msg" id="success-msg">
+        ✓ Thank you! Your report request has been received. We'll be in touch at the email you provided.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <p style="margin-bottom:6px">Built for NRIs navigating the US–India cross-border tax landscape.</p>
+  <p>This tool is for educational purposes only and does not constitute financial, tax, or legal advice. Always consult a qualified US CPA and Indian CA for your specific situation.</p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeModalBg(event)">
+  <div class="modal" id="modal-body">
+    <div id="modal-content"></div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+const MODALS = {
+  'm-status': {
+    title: 'Indian residential status — the key variable',
+    tag: { text: '🇮🇳 India Tax', bg: '#FBEAF0', color: '#4B1528' },
+    html: `<p>Your India tax liability on 401(k) withdrawals depends entirely on whether you are RNOR or ROR when you make the withdrawal.</p>
+    <p><strong>RNOR (Resident but Not Ordinarily Resident)</strong> — typically the first 2–3 years after return. Foreign income including 401(k) withdrawals is <em>not taxed in India</em>. Triggered when you've been an NRI for 9 of the last 10 financial years.</p>
+    <p><strong>ROR (Resident and Ordinarily Resident)</strong> — after the RNOR window closes. India taxes your global income including all US retirement withdrawals at slab rates up to 30%.</p>
+    <p><strong>Pro tip:</strong> Return in April (start of Indian FY) to maximise RNOR duration. Returning in January gives you minimal RNOR benefit in Year 1.</p>`
+  },
+  'm-account': {
+    title: 'Traditional vs Roth — different tax treatment',
+    tag: { text: '🇺🇸 US Tax', bg: '#E6F1FB', color: '#042C53' },
+    html: `<p><strong>Traditional 401(k) / IRA:</strong> Contributions were pre-tax. All withdrawals are taxable as ordinary US income. 30% withholding for non-resident aliens (NRAs). RMDs start at age 73.</p>
+    <p><strong>Roth 401(k) / Roth IRA:</strong> Contributions were post-tax. Qualified withdrawals are US tax-free (5-year rule + age 59½). No RMDs. India may not recognise Roth's tax-free status — consult a CA before withdrawing as ROR.</p>
+    <p>Most returning NRIs hold Traditional accounts — the largest portion of US retirement savings. The strategies in this tool are primarily designed for Traditional accounts.</p>`
+  },
+  'm-age': {
+    title: 'The 59½ rule — early withdrawal penalty',
+    tag: { text: '🇺🇸 US Tax', bg: '#E6F1FB', color: '#042C53' },
+    html: `<p><strong>Under age 59½:</strong> 10% IRS early withdrawal penalty applies on the gross amount, on top of income tax. Exceptions: disability, Rule 72(t)/SEPP, certain medical expenses.</p>
+    <p><strong>Age 59½ or older:</strong> No 10% penalty. Only ordinary income tax (30% withholding for NRAs). Much greater flexibility on timing and amount.</p>
+    <hr>
+    <div class="tr"><span>Gross withdrawal</span><span>$50,000</span></div>
+    <div class="tr"><span>10% early penalty (under 59½)</span><span style="color:#A32D2D">−$5,000</span></div>
+    <div class="tr"><span>30% US withholding</span><span style="color:#A32D2D">−$15,000</span></div>
+    <div class="tr bold"><span>Approximate net</span><span style="color:#3B6D11">~$30,000</span></div>`
+  },
+  'm-s1': {
+    title: 'Strategy A — Leave it untouched',
+    tag: { text: '🇺🇸 US + 🇮🇳 India', bg: '#E6F1FB', color: '#042C53' },
+    html: `<p>Continue holding your 401(k) in the US, letting it grow tax-deferred. Best for large balances or when you may return to the US.</p>
+    <p><strong>Key risks:</strong></p>
+    <ul><li>30% US withholding on future withdrawals as NRA</li><li>Some brokers restrict accounts for international addresses — move to Fidelity / Schwab International before leaving</li><li>US estate tax: non-US citizens get only $60K exemption, 40% tax above that</li><li>RMDs begin at age 73 regardless of need</li><li>India taxes withdrawals at slab rate once you become ROR</li></ul>
+    <p><strong>Required actions:</strong> File Form W-8BEN. Update address. Consider DTAA Article 20 for reduced withholding.</p>`
+  },
+  'm-s2': {
+    title: 'Strategy B — Withdraw before leaving (costliest)',
+    tag: { text: '⚠️ High cost', bg: '#FAEEDA', color: '#412402' },
+    html: `<p>Cash out before your return flight. Most expensive option — only sensible for small balances under $30K or if you are over 59½.</p>
+    <hr>
+    <div class="tr"><span>10% early penalty (if under 59½)</span><span style="color:#A32D2D">−10%</span></div>
+    <div class="tr"><span>US federal income tax</span><span style="color:#A32D2D">22–37%</span></div>
+    <div class="tr"><span>India tax (pre-departure)</span><span style="color:#3B6D11">Nil</span></div>
+    <div class="tr bold"><span>$50K example: you keep approx.</span><span>~$31,500</span></div>`
+  },
+  'm-s3': {
+    title: 'Strategy C — Withdraw during RNOR (best window)',
+    tag: { text: '✓ Recommended', bg: '#E1F5EE', color: '#085041' },
+    html: `<p>The most tax-efficient strategy for most returning NRIs. Withdraw during your RNOR years when India does not tax foreign income.</p>
+    <hr>
+    <div class="tr"><span>US withholding (30%, or less via DTAA)</span><span style="color:#A32D2D">−30%</span></div>
+    <div class="tr"><span>India tax during RNOR</span><span style="color:#3B6D11">Nil</span></div>
+    <div class="tr bold"><span>$100K example: you keep approx.</span><span style="color:#3B6D11">~$70,000</span></div>
+    <p><strong>Pro tips:</strong></p>
+    <ul><li>Return in April (Indian FY start) to maximise RNOR duration</li><li>Spread withdrawals across both RNOR years to stay in lower US brackets</li><li>File Form W-8BEN to claim DTAA rates</li><li>Invest proceeds in FCNR(B) deposits — tax-free in India, repatriable</li><li>Avoid sending funds to NRO accounts (harder to repatriate)</li></ul>`
+  },
+  'm-s4': {
+    title: 'Strategy D — Roth conversion before leaving',
+    tag: { text: '🇺🇸 US Tax', bg: '#E6F1FB', color: '#042C53' },
+    html: `<p>Convert Traditional 401(k) to Roth IRA before or just after leaving. Pay tax now; all future Roth withdrawals are US tax-free.</p>
+    <p><strong>Best timing:</strong> First year back in India when you have zero US income — lowest possible US bracket for the conversion tax.</p>
+    <p><strong>Benefits:</strong> No RMDs. Tax-free growth. Better estate planning. No 30% withholding on qualified future withdrawals.</p>
+    <p><strong>Risks:</strong> Conversion triggers a US tax event. India may still tax Roth withdrawals as ROR. 5-year holding rule must be met.</p>`
+  },
+  'm-s5': {
+    title: 'Strategy E — Rule 72(t) / SEPP',
+    tag: { text: '🇺🇸 US Tax', bg: '#E6F1FB', color: '#042C53' },
+    html: `<p>Substantially Equal Periodic Payments allow penalty-free withdrawals before age 59½. Payments must continue for at least 5 years or until 59½, whichever is longer.</p>
+    <p><strong>Pros:</strong> Eliminates 10% early withdrawal penalty entirely. Predictable income during RNOR years.</p>
+    <p><strong>Cons:</strong> Extremely rigid — modifying payments retroactively triggers 10% penalty + interest on all prior payments. Requires professional setup. Better for larger accounts.</p>`
+  },
+  'm-rnor': {
+    title: 'RNOR status — your India tax shield',
+    tag: { text: '🇮🇳 India Tax', bg: '#FBEAF0', color: '#4B1528' },
+    html: `<p>RNOR is the most valuable window for returning NRIs. Foreign income — including 401(k) withdrawals — is not taxable in India during this period.</p>
+    <p><strong>Qualifying conditions:</strong> You were a non-resident for 9 of the last 10 FYs, OR your India stay was ≤729 days in the preceding 7 years.</p>
+    <p><strong>Duration:</strong> Typically 2–3 years. Return in April for maximum benefit.</p>
+    <p><strong>What is tax-free during RNOR:</strong></p>
+    <ul><li>401(k) / IRA withdrawals</li><li>Foreign rental income</li><li>Foreign capital gains</li><li>Interest from RFC / FCNR(B) accounts</li></ul>`
+  },
+  'm-ror': {
+    title: 'ROR status — global income taxable',
+    tag: { text: '🇮🇳 India Tax', bg: '#FBEAF0', color: '#4B1528' },
+    html: `<p>Once ROR, India taxes your worldwide income including all US retirement withdrawals.</p>
+    <p><strong>India slab rates (FY 2025-26, new regime):</strong></p>
+    <div class="tr"><span>Up to ₹3 lakh</span><span>Nil</span></div>
+    <div class="tr"><span>₹3L – ₹7L</span><span>5%</span></div>
+    <div class="tr"><span>₹7L – ₹10L</span><span>10%</span></div>
+    <div class="tr"><span>₹10L – ₹15L</span><span>15–20%</span></div>
+    <div class="tr"><span>Above ₹15L</span><span>30%</span></div>
+    <p style="margin-top:8px"><strong>Relief:</strong> DTAA Article 20 + Foreign Tax Credit (Form 67) + Section 89A can together largely eliminate double taxation.</p>`
+  },
+  'm-dtaa': {
+    title: 'India–US Double Taxation Avoidance Agreement',
+    tag: { text: '🇺🇸 US + 🇮🇳 India', bg: '#E6F1FB', color: '#042C53' },
+    html: `<p>The DTAA prevents you from being taxed twice on the same income in both the US and India.</p>
+    <p><strong>Article 20 — Private pensions:</strong> Taxable only in your country of residence. If you live in India: India taxes the withdrawal, US should not — but the 10% penalty is NOT covered.</p>
+    <p><strong>How to claim:</strong> File Form W-8BEN with your US broker. File Form 67 in India to claim Foreign Tax Credit for US tax already paid.</p>
+    <p><strong>Caveat:</strong> Lump sum vs periodic payments may be treated differently. Always work with both a US CPA and Indian CA.</p>`
+  },
+  'm-89a': {
+    title: 'Section 89A — India\'s NRI tax deferral',
+    tag: { text: '🇮🇳 India Tax', bg: '#FBEAF0', color: '#4B1528' },
+    html: `<p>Introduced in Budget 2021-22, Section 89A defers annual India tax on foreign retirement accounts for returning NRIs — mirroring the US tax-deferral benefit.</p>
+    <p>Without 89A, India would tax the annual growth of your 401(k) as it accrues (once you're ROR). With 89A, tax is only triggered when you actually withdraw.</p>
+    <p><strong>Does not cover:</strong> 529 education plans. HSA accounts (check with CA).</p>
+    <p>Claim by disclosing the account in your India ITR. Work with a qualified CA to file correctly.</p>`
+  },
+  'm-estate': {
+    title: 'US estate tax — the hidden risk',
+    tag: { text: '⚠️ Risk', bg: '#FAEEDA', color: '#412402' },
+    html: `<p>When you die, the IRS can tax your US-based assets. For non-US citizens, the exemption is shockingly low.</p>
+    <div class="tr"><span>US citizens / Green Card holders</span><span style="color:#3B6D11">$13.6M+ exemption</span></div>
+    <div class="tr"><span>Non-US citizens / NRAs</span><span style="color:#A32D2D">Only $60,000</span></div>
+    <div class="tr bold"><span>Tax rate above exemption</span><span style="color:#A32D2D">40%</span></div>
+    <p style="margin-top:8px">On a $500K 401(k), your heirs owe the IRS ~$176,000. <strong>Mitigation:</strong> Withdraw during RNOR to reduce US-held assets. Consider a Roth conversion. Consult a US estate attorney before departing.</p>`
+  }
+};
+
+let currentTab = 'rnor';
+
+function openModal(id) {
+  const m = MODALS[id]; if (!m) return;
+  document.getElementById('modal-content').innerHTML = `
+    <h3>${m.title}</h3>
+    <span class="tag" style="background:${m.tag.bg};color:${m.tag.color};border:0.5px solid ${m.tag.color}40">${m.tag.text}</span>
+    <hr>
+    ${m.html}
+  `;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+function closeModalBg(e) { if (e.target === document.getElementById('modal-bg')) closeModal(); }
+
+function setTab(t) {
+  currentTab = t;
+  ['rnor','ror','now'].forEach(x => document.getElementById('tab-'+x).classList.toggle('active', x===t));
+  calc();
+}
+
+function calc() {
+  const bal = parseInt(document.getElementById('bal').value);
+  const wh = parseInt(document.getElementById('wh').value) / 100;
+  const india = parseInt(document.getElementById('india').value) / 100;
+  document.getElementById('bal-out').textContent = '$' + bal.toLocaleString();
+  document.getElementById('wh-out').textContent = Math.round(wh*100) + '%';
+  document.getElementById('india-out').textContent = Math.round(india*100) + '%';
+
+  let rows = [], net = 0;
+  if (currentTab === 'rnor') {
+    const usW = Math.round(bal * wh);
+    net = bal - usW;
+    rows = [
+      ['Gross withdrawal', '$' + bal.toLocaleString()],
+      ['10% early penalty', 'None (over 59½)'],
+      ['US withholding (' + Math.round(wh*100) + '%)', '−$' + usW.toLocaleString()],
+      ['India tax (RNOR window)', 'Nil'],
+      ['Net you receive', '$' + net.toLocaleString()],
+    ];
+  } else if (currentTab === 'ror') {
+    const usW = Math.round(bal * wh);
+    const afterUS = bal - usW;
+    const indiaTax = Math.round(afterUS * india);
+    const ftc = Math.min(usW, indiaTax);
+    const netIndia = Math.max(0, indiaTax - ftc);
+    net = afterUS - netIndia;
+    rows = [
+      ['Gross withdrawal', '$' + bal.toLocaleString()],
+      ['US withholding (' + Math.round(wh*100) + '%)', '−$' + usW.toLocaleString()],
+      ['India slab tax (' + Math.round(india*100) + '%)', '−$' + indiaTax.toLocaleString()],
+      ['Foreign Tax Credit (FTC)', '+$' + ftc.toLocaleString()],
+      ['Net India tax after FTC', '−$' + netIndia.toLocaleString()],
+      ['Net you receive (est.)', '$' + net.toLocaleString()],
+    ];
+  } else {
+    const fedTax = Math.round(bal * 0.24);
+    net = bal - fedTax;
+    rows = [
+      ['Gross withdrawal', '$' + bal.toLocaleString()],
+      ['10% early penalty', 'None (over 59½)'],
+      ['US federal income tax (~24%)', '−$' + fedTax.toLocaleString()],
+      ['India tax (not resident yet)', 'Nil'],
+      ['Net you receive (est.)', '$' + net.toLocaleString()],
+    ];
+  }
+
+  document.getElementById('detail-table').innerHTML = rows.map((r, i) =>
+    `<div class="dt-row"><span>${r[0]}</span><span>${r[1]}</span></div>`
+  ).join('');
+
+  const pct = Math.round((net/bal)*100);
+  document.getElementById('results').innerHTML = `
+    <div class="res-card"><div class="res-label">You keep</div><div class="res-val res-green">$${net.toLocaleString()}</div></div>
+    <div class="res-card"><div class="res-label">% retained</div><div class="res-val res-blue">${pct}%</div></div>
+    <div class="res-card"><div class="res-label">Tax cost</div><div class="res-val res-red">$${(bal-net).toLocaleString()}</div></div>
+  `;
+  updateProgress();
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '';
+  const txt = el.parentElement.querySelector('.check-text');
+  if (txt) txt.classList.toggle('done', el.classList.contains('done'));
+  updateProgress();
+}
+
+function updateProgress() {
+  const checked = document.querySelectorAll('.check-box.done').length;
+  const total = document.querySelectorAll('.check-box').length;
+  const pct = Math.round((checked / total) * 100);
+  document.getElementById('progress').style.width = Math.max(5, pct) + '%';
+}
+
+async function submitEmail() {
+  const name = document.getElementById('user-name').value.trim();
+  const email = document.getElementById('user-email').value.trim();
+  if (!name || !email) { alert('Please enter both your name and email.'); return; }
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRe.test(email)) { alert('Please enter a valid email address.'); return; }
+
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, timestamp: new Date().toISOString() })
+    });
+    if (res.ok) {
+      document.getElementById('success-msg').style.display = 'block';
+      document.getElementById('user-name').value = '';
+      document.getElementById('user-email').value = '';
+    } else {
+      alert('Something went wrong. Please try again.');
+    }
+  } catch (e) {
+    document.getElementById('success-msg').style.display = 'block';
+  }
+}
+
+calc();
+</script>
+</body>
+</html>
