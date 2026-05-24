@@ -564,17 +564,22 @@ function calc() {
     const afterPenalty = bal - penalty;
     const usW = Math.round(afterPenalty * wh);
     const afterUS = afterPenalty - usW;
-    const indiaTax = Math.round(afterUS * india);
-    const ftc = Math.min(usW, indiaTax);
-    const netIndia = Math.max(0, indiaTax - ftc);
+    // India taxes the taxable income (post-penalty, pre-withholding), not the post-withholding amount
+    const indiaTaxBase = afterPenalty;
+    const indiaTaxGross = Math.round(indiaTaxBase * india);
+    // FTC: credit for US tax already paid, capped at India liability
+    const ftc = Math.min(usW, indiaTaxGross);
+    const netIndia = Math.max(0, indiaTaxGross - ftc);
+    // Net = what you receive after withholding, minus any residual India tax not covered by FTC
     net = afterUS - netIndia;
     rows = [
       ['Gross withdrawal', '$' + bal.toLocaleString(), ''],
       ['10% early penalty', penaltyLabel, penaltyColor],
+      ['Taxable income (post-penalty)', '$' + afterPenalty.toLocaleString(), 'color:#6b6b67'],
       ['US withholding (' + Math.round(wh*100) + '%)', '−$' + usW.toLocaleString(), 'color:#A32D2D'],
-      ['India slab tax (' + Math.round(india*100) + '%)', '−$' + indiaTax.toLocaleString(), 'color:#A32D2D'],
-      ['Foreign Tax Credit (FTC)', '+$' + ftc.toLocaleString(), 'color:#3B6D11'],
-      ['Net India tax after FTC', '−$' + netIndia.toLocaleString(), 'color:#A32D2D'],
+      ['India slab tax (' + Math.round(india*100) + '% on taxable income)', '−$' + indiaTaxGross.toLocaleString(), 'color:#A32D2D'],
+      ['FTC: US tax paid (capped at India liability)', '+$' + ftc.toLocaleString(), 'color:#3B6D11'],
+      ['Net India tax after FTC', netIndia > 0 ? '−$' + netIndia.toLocaleString() : '$0', netIndia > 0 ? 'color:#A32D2D' : 'color:#3B6D11'],
       ['Net you receive (est.)', '$' + net.toLocaleString(), ''],
     ];
   } else {
@@ -647,4 +652,3 @@ calc();
 </script>
 </body>
 </html>
- 
